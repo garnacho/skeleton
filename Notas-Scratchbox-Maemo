@@ -1,0 +1,90 @@
+Scratchbox - Maemo
+
+Instalacion
+
+• Instalar scratchbox
+	∘ Facil
+		‣ Bajar script de Maemo 5
+			• http://www.forum.nokia.com/Tools_Docs_and_Code/Tools/Platforms/Maemo/
+		‣ Script de scratchbox
+			• # sh ./maemo-scratchbox-install_5.0.sh 
+			• -F con x64
+	∘ Manual
+		‣ deb http://scratchbox.org/debian maemo5-sdk main
+		‣ apt-get update
+		‣ apt-get install scratchbox-core 
+• Configurar para un usuario
+	∘ sb-adduser `whoami`
+	∘ log in/out
+• Sb-menu
+	∘ Configurar target
+		‣ selection gcc
+		‣ devkits
+		‣ emulacion de arquitectura
+	∘ Instalar archivos
+		‣ libc, fakeroot, gdb, strace, etc...
+	∘ Instalar rootstrap
+		‣ imagen del SDK
+			• maemo-sdk-install_5.0.sh
+			• baja los rootstraps al home de sb
+	∘ Seleccionar bootstrap
+	∘ Login
+		‣ /scratchbox/login
+• Instalar componentes privados de Nokia
+	∘ Codigo cerrado, protegido por eula
+	∘ No hace falta aceptarla, y vamos a usar los componentes libres.
+	∘ http://tablets-dev.nokia.com/eula/index.php
+		‣ añadir linea a sources.list
+		‣ fakeroot apt-get install nokia-binaries nokia-apps
+• Instalar Xephyr
+	∘ apt-get install xserver-xephyr
+
+Ejecutar entorno grafico
+• En host
+	∘ Xephyr :2 -host-cursor -screen 800x480x16 -dpi 96 -ac -kb
+• en sb
+	∘ export DISPLAY=:2
+	∘ af-sb-init.sh start
+
+Problemas
+• Inconsistency detected by ld.so: rtld.c: 1192: dl_main: Assertion `(void *) ph->p_vaddr == _rtld_local._dl_sysinfo_dso' failed!
+	∘ VDSO (Virtual Dynamic Shared Object) /proc/sys/vm/vdso_enabled
+	∘ vdso=0 in grub, vdso32=0 si 64bits
+• mmap: permission denied
+	∘ sudo sh -c 'echo 4096 > /proc/sys/vm/mmap_min_addr'
+
+
+Scratchbox 2
+• Mola, pero no tira bien todavia
+	∘ problema en ld
+• Maemo SDK+, ultima act Oct 2009
+• http://maemo-sdk.garage.maemo.org/
+• Instalacion
+	∘ deb http://maemo-sdk.garage.maemo.org/download/host ubuntu-karmic free
+	∘ apt-get install maemo-sdk
+	∘ Herramientas de compilado
+		‣ sudo maemo-sdk install tools lenny-2009-1
+		‣ Porque de lenny? basicamente parecen las más probadas
+		‣ Instaladas en /opt, no entra en conflicto con la distribucion del host
+	∘ Compilacion cruzada
+		‣ sudo maemo-sdk install toolchain arm-2007q3
+		‣ sudo maemo-sdk install toolchain i386-2007q3
+	∘ Instalando un rootstrap
+		‣ maemo-sdk install rootstrap fremantle5.0minimal_armel
+		‣ maemo-sdk install rootstrap fremantle5.0minimal_i386
+	∘ Instalando paquetes privados
+		‣ igual que con sb1
+	∘ Manejandose
+		‣ sb2: shell de sb2, tambien vale para ejecutar comandos
+			• -R: como root
+		‣ sb2-config
+			•  -l: lista targets
+			• -d: cambia target
+		‣ GUI:
+			• maemo-sdk start gui
+			• maemo-sdk stop gui
+
+Resources
+• http://maemo.org/development/
+• http://maemo-sdk.garage.maemo.org/
+• http://maemo.org/development/sdks/maemo_5_api_documentation/
