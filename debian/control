@@ -1,0 +1,11 @@
+Source: skeleton
+Section: utils
+Priority: optional
+Maintainer: What Ever <what.ever@example.com>
+Build-Depends: libgtk2.0-0 (> 2.0)
+Standards-Version: 3.7.2
+
+Package: skeleton
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Skeleton package

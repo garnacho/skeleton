@@ -1,0 +1,69 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+  
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+include /usr/share/cdbs/1/class/gnome.mk
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
+include /usr/share/cdbs/1/rules/utils.mk
+
+# Skip .svn dirs if any in the build directories
+DEB_DH_ALWAYS_EXCLUDE := .svn:copyright:AUTHORS:NEWS:NEWS.gz:TODO:README:README.gz
+DEB_DH_STRIP_ARGS :=
+
+DEB_CONFIGURE_EXTRA_FLAGS := 
+
+DEB_CONFIGURE_SCRIPT_ENV += LDFLAGS="-Wl,--as-needed"
+
+# Enforce tight shlibs dependencies
+# DEB_DH_MAKESHLIBS_ARGS_ALL := -V
+
+# Disable documentation in $prefix/share/doc/*
+DEB_DH_INSTALLCHANGELOGS_ARGS := --no-act
+DEB_DH_INSTALLDOCS_ARGS := --no-act
+
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+  confflags += --build $(DEB_HOST_GNU_TYPE)
+else
+  confflags += --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE)
+endif
+
+CFLAGS += -g
+
+# Use soft-float and thumb mode if it enabled.
+ifneq (,$(findstring thumb,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -mthumb
+endif
+
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+        INSTALL_PROGRAM += -s
+endif
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
+endif
+
+ifneq (,$(findstring nodocs,$(DEB_BUILD_OPTIONS)))
+        DEB_BUILD_OPTIONS=$(DEB_BUILD_OPTIONS),nodocs
+endif
+
+post-patches:: debian/stamp-autothings-update
+debian/stamp-autothings-update:
+	# Set ACLOCAL_FLAGS so that libtool.m4 is picked up in scratchbox 1.0.x + sardine
+	NOCONFIGURE=1 ACLOCAL_FLAGS="-I /targets/links/arch_tools/share/aclocal" ./autogen.sh $(DEB_CONFIGURE_EXTRA_FLAGS)
+	# Can add things here that need to be ran after autogen.sh
+	touch $@
+
+clean::
+	rm -f debian/stamp-autothings-update
+
